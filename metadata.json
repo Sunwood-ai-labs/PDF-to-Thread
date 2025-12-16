@@ -1,0 +1,5 @@
+{
+  "name": "PDF to Thread Converter",
+  "description": "Convert PDF slides into images and generate AI-powered social media threads and descriptions using Gemini.",
+  "requestFramePermissions": []
+}
