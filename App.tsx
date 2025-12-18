@@ -4,13 +4,14 @@ import { convertPdfToImages } from './services/pdfService';
 import { generateThreadContent } from './services/geminiService';
 import PdfUploader from './components/PdfUploader';
 import ThreadEditor from './components/ThreadEditor';
-import { Sparkles, FileImage, Layers, Loader2 } from 'lucide-react';
+import { Sparkles, FileImage, Layers, Loader2, Link as LinkIcon } from 'lucide-react';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   const [slides, setSlides] = useState<SlideData[]>([]);
   const [threadResult, setThreadResult] = useState<GeneratedThread | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [sourceUrl, setSourceUrl] = useState<string>('');
 
   const handleFileSelect = async (file: File) => {
     try {
@@ -31,7 +32,7 @@ const App: React.FC = () => {
     
     try {
       setAppState(AppState.GENERATING_CONTENT);
-      const result = await generateThreadContent(slides);
+      const result = await generateThreadContent(slides, sourceUrl);
       setThreadResult(result);
       setAppState(AppState.COMPLETED);
     } catch (err) {
@@ -55,6 +56,7 @@ const App: React.FC = () => {
     setSlides([]);
     setThreadResult(null);
     setErrorMsg(null);
+    setSourceUrl('');
   };
 
   return (
@@ -131,7 +133,7 @@ const App: React.FC = () => {
         {appState === AppState.READY_TO_GENERATE && (
           <div className="max-w-4xl mx-auto animate-fade-in-up">
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">
                     {slides.length}枚のスライドを読み込みました
@@ -140,13 +142,29 @@ const App: React.FC = () => {
                     プレビューを確認して、スレッドを生成してください。
                   </p>
                 </div>
-                <button
-                  onClick={handleGenerateThread}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-bold shadow-lg hover:shadow-indigo-500/30 transition transform hover:-translate-y-0.5 flex items-center"
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  AIでスレッドを生成する
-                </button>
+                
+                <div className="flex flex-col gap-3 w-full md:w-auto">
+                   <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <LinkIcon className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    </div>
+                    <input
+                      type="url"
+                      placeholder="参考URL (任意: 公式記事など)"
+                      value={sourceUrl}
+                      onChange={(e) => setSourceUrl(e.target.value)}
+                      className="block w-full md:w-72 pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 sm:text-sm transition-all shadow-sm"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleGenerateThread}
+                    className="w-full md:w-auto px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-bold shadow-lg hover:shadow-indigo-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center"
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    AIでスレッドを生成
+                  </button>
+                </div>
               </div>
               
               <div className="p-8 bg-gray-50">
